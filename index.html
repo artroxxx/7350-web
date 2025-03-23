@@ -1,0 +1,822 @@
+<!--HTML 头部设置-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firstflight Travels</title>
+    <script src="https://webapi.amap.com/maps?v=1.4.15&key=91961cb53c10094f552d0523ef2534c2"></script>
+    <!-- 引入高德地图路线规划插件 -->
+    <script src="https://webapi.amap.com/ui/1.1/main.js?v=1.1"></script>
+    <!--全局样式-->
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            text-decoration: none;
+            list-style: none;
+            scroll-behavior: smooth;
+        }
+
+        /* 横幅部分 */
+       .banner {
+            width: 100%;
+            /* 背景图片填充整个视口 */
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* 动态背景效果 */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+       .banner img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+       .content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: 100vh;
+            background-image: linear-gradient(rgba(1, 0, 5, 0.3), rgba(4, 1, 17, 0.3));
+        }
+
+       .title {
+            text-decoration: none;
+            font-size: 4vh;
+            color: rgb(255, 255, 255);
+            padding: 14px 17px;
+            margin-top: 32vh;
+            text-align: center;
+        }
+
+       .title h1 {
+            font-size: 10vh;
+            text-shadow: 2px black;
+            transition: ease 0.3s;
+        }
+
+       .title h1:hover {
+            color: transparent;
+            -webkit-text-stroke: 1px white;
+            transform: scale(1.1);
+        }
+
+        /* 索引部分布局 */
+       .text h2 {
+            font-size: 40px;
+            font-weight: 650;
+            margin-top: 40px;
+            margin-bottom: 10px;
+            line-height: 2;
+            text-align: center;
+        }
+
+        /* 索引内容布局 */
+       .rowitems {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            /* 每行固定3列 */
+            gap: 20px;
+            align-items: center;
+            text-align: center;
+            margin: 20px 30px 10px 30px;
+        }
+
+        /* 索引图片的样式 */
+       .rowitems img {
+            width: 100%;
+            /* 设置图片宽度为100%以适应网格列 */
+            max-width: 200px;
+            /* 限制图片最大宽度，避免过大 */
+            height: auto;
+            /* 保持图片比例 */
+        }
+
+       .container-box {
+            border: 1px solid #d3d3d3;
+            border-radius: 5px;
+            padding: 50px 10px;
+            transition: all 0.7s ease 0s;
+            cursor: pointer;
+        }
+
+       .container-image img {
+            height: 100px;
+            width: 100px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+       .container-box h4 {
+            font-size: 20px;
+            margin-bottom: 5px;
+            font-weight: 550;
+        }
+
+       .container-box:hover {
+            transform: translateX(3px);
+            box-shadow: 5px 20px 50px rgba(78, 78, 78, 0.1);
+            border: 1px solid transparent;
+            border-radius: 0px;
+        }
+
+        /* 中环美食 */
+       .zfood-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* 中环美食单列 */
+       .col-content {
+            position: relative;
+            width: 320px;
+            /* 调整宽度，保持与 p2 图片一致 */
+            margin: 10px;
+            overflow: hidden;
+            border-radius: 20px;
+            /* 保持圆角 */
+        }
+
+       .col-content img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            /* 圆角调整 */
+            transition: transform 0.3s ease;
+            /* 保持原有的动态效果 */
+        }
+
+       .col-content .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 157, 61, 0.7);
+            /* 红色半透明 */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            padding: 0;
+            /* 移除 padding */
+            box-sizing: border-box;
+            /* 确保内边距不会改变尺寸 */
+        }
+
+       .col-content:hover .overlay {
+            opacity: 1;
+        }
+
+       .col-content:hover img {
+            transform: scale(1.05);
+            /* 悬停时略微放大图片 */
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .popup p {
+            margin-bottom: 20px;
+        }
+
+        .popup-close {
+            background: #ff5a5f;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .popup-close:hover {
+            background: #e74c3c;
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+
+        /* 🎰 游戏机外框 */
+        .slot-machine-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .slot-machine {
+            width: 250px;
+            height: 60px;
+            overflow: hidden;
+            border: 5px solid #000;
+            background: #222;
+            margin: 0 auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;  /* 🔺 字体加大 */
+            font-weight: bold;
+            color: #fff;
+            border-radius: 10px;
+        }
+
+        .slot {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            transition: transform 1s ease-out;
+        }
+
+        .spin-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #ff5722;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .spin-button:hover {
+            background: #e64a19;
+        }
+
+
+        /* 景点 */
+       .attraction-title {
+            text-align: center;
+        }
+
+       .attraction-title h2 {
+            font-size: 40px;
+            font-weight: 650;
+            padding-top: 75px;
+            padding-bottom: 10px;
+            line-height: 2;
+        }
+
+       .attraction-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            /* 居中排列，避免左右挤压 */
+            gap: 20px;
+            /* 添加间距 */
+        }
+
+       .attraction-content .box {
+            display: flex;
+            flex-direction: column;
+            /* 确保图片和文字垂直排列 */
+            width: 320px;
+            /* 与图片宽度一致 */
+        }
+
+       .image {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.445, 0.05, 0.55, 0.95);
+            cursor: pointer;
+            filter: brightness(95%);
+        }
+
+       .image img {
+            width: 100%;
+            /* 图片宽度100% */
+            height: auto;
+            border-radius: 20px;
+        }
+
+       .dest-content {
+            width: 100%;
+            /* 确保文字宽度与图片一致 */
+            padding: 10px;
+        }
+
+       .dest-content .attraction h4 {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+       .dest-content .attraction p {
+            font-size: 15px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            /* 确保文字换行 */
+            overflow-wrap: break-word;
+            /* 确保长词可以换行 */
+        }
+
+       .pac-details li {
+            font-size: 19px;
+            color: #4c4c4c;
+            margin-left: 15px;
+            margin-bottom: 2px;
+            list-style-type: disc;
+        }
+
+       .image:hover {
+            filter: brightness(120%);
+            transform: scale(1.03);
+        }
+
+        /* 地图 */
+        #map {
+            width: 80%;
+            height: 500px;
+            margin: 0 auto;
+            /* 居中 */
+        }
+
+        /* 新增天气信息样式 */
+       .weather-info {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* 新增景点评分和评论样式 */
+       .rating {
+            color: orange;
+            font-size: 20px;
+        }
+
+       .comments {
+            margin-top: 10px;
+        }
+
+       .comments p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* 页脚 */
+       .footer {
+            margin-top: 80px;
+            background-color: #640D5F;
+        }
+
+       .foot {
+            padding: 20px 0;
+        }
+
+       .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+       .footlinks h4 {
+            margin-top: 30px;
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+       .footlinks h4::before {
+            content: "";
+            position: absolute;
+            height: 2px;
+            width: 70px;
+            left: 0;
+            bottom: -7px;
+            background: white;
+        }
+
+       .footlinks ul li {
+            margin-bottom: 15px;
+            color: white;
+        }
+
+       .end {
+            text-align: center;
+            padding-top: 60px;
+            padding-bottom: 12px;
+        }
+
+       .end p {
+            font-size: 15px;
+            color: white;
+            letter-spacing: 1px;
+            font-weight: 300;
+        }
+
+       .social p {
+            color: white;
+            /* 改为白色 */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 横幅部分 -->
+    <div class="banner">
+        <img src="./files/ztop_zh.PNG" alt="Hong Kong Central" />
+        <div class="content" id="home">
+            <div class="title">
+                <h1>探索香港中环</h1><br>
+                <p>在繁华中环，探索美食与文化的完美交融</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 索引部分布局 -->
+    <section class="container">
+        <div class="text">
+            <h2>为你提供索引!</h2>
+        </div>
+        <div class="rowitems">
+            <div class="container-box" onclick="scrollToSection('zfoods')">
+                <div class="container-image">
+                    <img src="./files/中环美食.jpg" alt="Flight Services">
+                </div>
+                <h4>美食</h4>
+            </div>
+            <div class="container-box" onclick="scrollToSection('attraction')">
+                <div class="container-image">
+                    <img src="./files/中环景点.png" alt="Food Services">
+                </div>
+                <h4>景点</h4>
+            </div>
+            <div class="container-box" onclick="scrollToSection('map')">
+                <div class="container-image">
+                    <img src="./files/中环地图.png" alt="Travel Services">
+                </div>
+                <h4>地图</h4>
+            </div>
+        </div>
+    </section>
+
+    <!-- 中环美食 -->
+    <section class="zfoods" id="zfoods">
+        <div class="attraction-title">
+            <h2>美食</h2>
+        </div>
+        <div class="zfood-content">
+            <div class="col-content" onclick="showPopup('曲奇四重奏', '香港著名的手工曲奇品牌，口感酥脆，深受游客喜爱。')">
+                <img src="./files/zfood_1.JPG" alt="">
+                <div class="overlay">曲奇四重奏</div>
+            </div>
+            <div class="col-content" onclick="showPopup('Ohlalaout', '以法式甜品闻名的小店，特色焦糖布丁广受好评。')">
+                <img src="./files/zfood_2.jpg" alt="">
+                <div class="overlay">Ohlalaout</div>
+            </div>
+            <div class="col-content" onclick="showPopup('华嫂冰室', '招牌菠萝包搭配奶茶，正宗港式风味，排队也值得等待！')">
+                <img src="./files/zfood_3.jpg" alt="">
+                <div class="overlay">华嫂冰室</div>
+            </div>
+            <div class="col-content" onclick="showPopup('荣记粉面', '特色牛腩面，汤头浓郁，面条劲道，是本地人的最爱。')">
+                <img src="./files/zfood_4.jpg" alt="">
+                <div class="overlay">荣记粉面</div>
+            </div>
+            <div class="col-content" onclick="showPopup('牛杂天王', '炖煮入味的牛杂配上秘制酱汁，每一口都是地道香港风味。')">
+                <img src="./files/zfood_5.jpg" alt="">
+                <div class="overlay">牛杂天王</div>
+            </div>
+            <div class="col-content" onclick="showPopup('bakehouse', '新鲜出炉的可颂香气四溢，搭配咖啡简直是完美早餐。')">
+                <img src="./files/zfood_6.jpg" alt="">
+                <div class="overlay">bakehouse</div>
+            </div>
+            <div class="col-content" onclick="showPopup('chullschick', '秘制炭烤鸡肉，外酥里嫩，令人垂涎欲滴。')">
+                <img src="./files/zfood_7.jpg" alt="">
+                <div class="overlay">chullschick</div>
+            </div>
+            <div class="col-content" onclick="showPopup('fiata pizza', '手工窑烤披萨，饼皮香脆，奶酪拉丝，味道纯正。')">
+                <img src="./files/zfood_8.jpg" alt="">
+                <div class="overlay">fiata pizza</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 弹窗和遮罩层 -->
+    <div class="popup-overlay" id="popupOverlay" onclick="closePopup()"></div>
+    <div class="popup" id="popup">
+        <h3 id="popup-title"></h3>
+        <p id="popup-content"></p>
+        <button class="popup-close" onclick="closePopup()">关闭</button>
+    </div>
+
+    <script>
+        function showPopup(title, content) {
+            document.getElementById('popup-title').innerText = title;
+            document.getElementById('popup-content').innerText = content;
+            document.getElementById('popup').style.display = 'block';
+            document.getElementById('popupOverlay').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+            document.getElementById('popupOverlay').style.display = 'none';
+        }
+    </script>
+
+
+    <!-- 🎰 幸运转盘（游戏机样式） -->
+    <div class="slot-machine-container">
+        <h2>🎰 今天吃什么？</h2>
+        <div class="slot-machine">
+            <div class="slot" id="slot">🎲 点击按钮开始</div>
+        </div>
+        <button class="spin-button" onclick="spinSlot()">🎡 开始转动</button>
+    </div>
+
+    <script>
+        function spinSlot() {
+            let slot = document.getElementById("slot");
+
+            // 备选美食
+            let options = [
+                "曲奇四重奏 🍪",
+                "Ohlalaout 🍰",
+                "华嫂冰室 🥐",
+                "荣记粉面 🍜",
+                "牛杂天王 🥩",
+                "bakehouse 🥖",
+                "chullschick 🍗",
+                "fiata pizza 🍕"
+            ];
+
+            // 🎲 计算随机美食
+            let randomIndex = Math.floor(Math.random() * options.length);
+            let selectedFood = options[randomIndex];
+
+            // 🎡 先显示滚动效果
+            let tempText = "🍽️ 选择中...".repeat(1);
+            slot.innerHTML = tempText;
+
+            // 🎯 1.5 秒后停在最终结果
+            setTimeout(() => {
+                slot.innerHTML = selectedFood;
+            }, 1500);
+        }
+    </script>
+
+
+    <!-- 景点 -->
+    <section class="attraction" id="attraction">
+        <div class="attraction-title">
+            <h2>景点</h2>
+        </div>
+        <div class="attraction-content">
+            <div class="box">
+                <div class="image">
+                    <img src="./files/zattraction_1.jpg" alt="">
+                </div>
+                <div class="dest-content">
+                    <div class="attraction">
+                        <h4>中环街市</h4><br>
+                        <p>
+                            中环街市是香港历史悠久的传统市场，您可以在这里找到各类新鲜的蔬果、海鲜以及地道的香港小吃。这里的传统气息与现代化的中环区形成鲜明对比，是体验香港本地文化的好地方
+                        </p>
+                        <div class="rating">★★★★</div>
+                        <div class="comments">
+                            <p>这里的小吃很地道，值得一去！</p>
+                            <p>市场很有特色，能感受到香港的历史文化。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="image">
+                    <img src="./files/zattraction_2.jpg" alt="">
+                </div>
+                <div class="dest-content">
+                    <div class="attraction">
+                        <h4>终审法院</h4><br>
+                        <p>
+                            终审法院是香港的最高法院，建筑风格典雅，历史悠久。在这里，您不仅能了解香港的司法系统，还能领略到该建筑独特的历史与文化氛围。附近有丰富的文化景点和美丽的街景，是游客不可错过的地方
+                        </p>
+                        <div class="rating">★★★</div>
+                        <div class="comments">
+                            <p>建筑很有特色，适合拍照。</p>
+                            <p>能了解到香港的司法历史，很不错。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="image">
+                    <img src="./files/zattraction_3.jpg" alt="">
+                </div>
+                <div class="dest-content">
+                    <div class="attraction">
+                        <h4>中环摩天轮</h4><br>
+                        <p>
+                            中环摩天轮是香港的一大地标，提供绝佳的香港岛和维多利亚港的全景视角。从摩天轮上，您可以欣赏到无与伦比的城市天际线及港口景色，是体验香港城市风光的最佳方式之一
+                        </p>
+                        <div class="rating">★★★★★</div>
+                        <div class="comments">
+                            <p>景色太美了，一定要去体验一下！</p>
+                            <p>晚上坐摩天轮看夜景超棒！</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="image">
+                    <img src="./files/zattraction_4.JPG" alt="">
+                </div>
+                <div class="dest-content">
+                    <div class="attraction">
+                        <h4>石板街</h4><br>
+                        <p>
+                            石板街是香港历史悠久的街道之一，街道上铺满了古老的石板，见证了香港的历史变迁。这里有许多传统的手工艺店铺和小吃摊，是了解香港传统文化和民间艺术的好地方。此外，石板街也是摄影爱好者的天堂，街头巷尾充满着老香港的韵味
+                        </p>
+                        <div class="rating">★★★★</div>
+                        <div class="comments">
+                            <p>很有复古的感觉，适合慢慢逛。</p>
+                            <p>能买到很多特色纪念品。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="attraction-title">
+        <h2>地图</h2>
+    </div>
+
+    <!-- 添加地图 -->
+    <div id="map"></div>
+
+    <!-- 添加实时天气信息 -->
+    <div class="weather-info">
+        <h3>香港中环实时天气</h3>
+        <p id="weather-text"></p>
+        <p id="weather-temp"></p>
+        <p id="weather-wind"></p>
+        <p id="weather-humidity"></p>
+    </div>
+
+    <!-- 页脚 -->
+    <section class="footer">
+        <div class="foot">
+            <div class="footer-content">
+                <div class="footlinks">
+                    <h4>感谢观看</h4>
+                    <ul>
+                        <li>(ง •̀_•́)ง</li>
+                    </ul>
+                </div>
+                <div class="footlinks">
+                    <h4>联系方式</h4>
+                    <div class="social">
+                        <p>
+                            24420433@life.hkbu.edu.hk
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="end">
+            <p>Copyright © 2025 Discover Central Hong Kong All Rights Reserved.<br>Website developed by: Yi Xingyu</p>
+        </div>
+    </section>
+
+    <script>
+        // 初始化地图
+        var map = new AMap.Map('map', {
+            zoom: 13,
+            center: [114.15769, 22.28552] // 中环大致中心位置
+        });
+
+        // 原有的地图初始化代码
+        function initMap() {
+            var map = new AMap.Map('map', {
+                center: [114.1578, 22.2837], // 设置地图中心点 (终审法院)
+                zoom: 13, // 设置地图缩放级别
+            });
+
+            // 加载并添加工具栏控件
+            AMap.plugin(['AMap.ToolBar', 'AMap.Scale', 'AMap.MapType'], function () {
+                map.addControl(new AMap.ToolBar()); // 工具栏
+                map.addControl(new AMap.Scale()); // 比例尺控件
+                map.addControl(new AMap.MapType()); // 地图类型控件
+            });
+
+            // 定义景点数据，包含景点的名称和坐标
+            var attractions = [
+                { name: '中环街市', position: [114.1589, 22.2823] },
+                { name: '终审法院', position: [114.1578, 22.2837] },
+                { name: '中环摩天轮', position: [114.1584, 22.2842] },
+                { name: '石板街', position: [114.1506, 22.2847] }
+            ];
+
+            // 为每个景点添加标记
+            attractions.forEach(function (attraction) {
+                var marker = new AMap.Marker({
+                    position: attraction.position, // 设置标记的位置
+                    title: attraction.name, // 设置标记的标题
+                });
+                marker.setMap(map); // 将标记添加到地图上
+            });
+
+            // 设置地图样式
+            map.setMapStyle('amap://styles/whitesmoke'); // 设置为白色主题样式
+        }
+
+        // 滚动到指定部分的函数
+        function scrollToSection(sectionId) {
+            var section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 获取实时天气数据
+        function getWeather() {
+            // 替换为你的真实API Key
+            const apiKey = '9de94a0e2bfa42bbbc8cebca323a4c02';
+            const location = '114.15,22.28'; // 中环大致经纬度
+            const apiUrl = `https://devapi.qweather.com/v7/weather/now?location=${location}&key=${apiKey}`;
+
+            fetch(apiUrl)
+              .then(response => response.json())
+              .then(data => {
+                    if (data.code === '200') {
+                        const weatherText = document.getElementById('weather-text');
+                        const weatherTemp = document.getElementById('weather-temp');
+                        const weatherWind = document.getElementById('weather-wind');
+                        const weatherHumidity = document.getElementById('weather-humidity');
+
+                        weatherText.textContent = `天气状况: ${data.now.text}`;
+                        weatherTemp.textContent = `温度: ${data.now.temp}°C`;
+                        weatherWind.textContent = `风向: ${data.now.windDir}，风力: ${data.now.windScale}级`;
+                        weatherHumidity.textContent = `湿度: ${data.now.humidity}%`;
+                    } else {
+                        console.error('获取天气数据失败:', data);
+                    }
+                })
+              .catch(error => {
+                    console.error('请求天气数据时出错:', error);
+                });
+        }
+
+        window.onload = function () {
+            initMap();
+            getWeather();
+        };
+    </script>
+</body>
+
+</html>    
